@@ -1,0 +1,466 @@
+<!-- Admin Dashboard Page -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .dashboard-box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            width: 200px;
+            text-align: center;
+            background-color: #f4f4f4;
+            border-radius: 8px;
+        }
+        
+        .logout-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .quick-actions {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .action-button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .latest-activities {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .latest-activities h3 {
+            margin-top: 15px;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+        
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background: #007bff;
+            color: white;
+        }
+        
+        form {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        input[type="text"] {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        h4 {
+            margin-top: 10px;
+            color: #333;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        li {
+            padding: 5px 0;
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            width: 50%;
+        }
+        
+        .search-input {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .search-btn {
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        
+        .search-btn:hover {
+            background: #0056b3;
+        }
+        
+        .export-btn {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 15px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .export-btn:hover {
+            background: #218838;
+        }
+        
+        .recent-activity {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        
+        .activity-section {
+            width: 30%;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .activity-section h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .activity-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .activity-section li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    {% block content %}
+
+    <h1>Admin Dashboard</h1>
+    <p>Welcome, {{ user.username }}! You are logged in as an Admin.</p>
+
+    <!-- Search Bar -->
+    <form method="GET" action="{% url 'admin_dashboard' %}">
+        <div class="search-container">
+            <input type="text" name="q" placeholder="Search users, bookings, or promotions..." value="{{ query }}" />
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+    <!-- Display Search Results -->
+    {% if query %}
+    <h3>Search Results for "{{ query }}"</h3>
+
+    <!-- User Results -->
+    <h4>Users</h4>
+    <ul>
+        {% for user in search_results.users %}
+        <li>{{ user.username }} - {{ user.email }}</li>
+        {% empty %}
+        <li>No users found.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Booking Results -->
+    <h4>Bookings</h4>
+    <ul>
+        {% for booking in search_results.bookings %}
+        <li>
+            {{ booking.user.username }} - {{ booking.date }} at {{ booking.time }}
+        </li>
+        {% empty %}
+        <li>No bookings found.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Promotion Results -->
+    <h4>Promotions</h4>
+    <ul>
+        {% for promo in search_results.promotions %}
+        <li>{{ promo.code }} - {{ promo.discount_percentage }}% Off</li>
+        {% empty %}
+        <li>No promotions found.</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="dashboard-container">
+        <!-- Total Users -->
+        <div class="dashboard-box">
+            <h3>Total Users</h3>
+            <p>{{ total_users }}</p>
+        </div>
+
+        <!-- Total Bookings -->
+        <div class="dashboard-box">
+            <h3>Total Bookings</h3>
+            <p>{{ total_bookings }}</p>
+        </div>
+
+        <!-- Total Payments -->
+        <div class="dashboard-box">
+            <h3>Total Payments</h3>
+            <p>£{{ total_payments|floatformat:2 }}</p>
+        </div>
+
+        <!-- Active Promotions -->
+        <div class="dashboard-box">
+            <h3>Active Promotions</h3>
+            <p>{{ active_promotions }}</p>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+
+
+        <!-- Button to Manage Users -->
+        <a href="{% url 'user_list' %}" class="action-button">Manage Users</a>
+
+        <!-- Button to Manage Bookings -->
+        <a href="{% url 'booking_list' %}" class="action-button">Manage Bookings</a
+      >
+
+      <!-- Button to Manage Promotions -->
+        <a href="{% url 'promotion_list' %}" class="action-button">Manage Promotions</a>
+
+        <!--Button to Manage Activities-->
+
+        <a href="{% url 'activity_list' %}" class="action-button">Manage Activities</a>
+
+        <!--Button for the calendar-->
+
+        <a href="{% url 'calendar' %}" class="action-button">Calendar</a>
+
+        <!--Button to manage members-->
+
+        <a href="{% url 'membership_list' %}" class="action-button">Members</a>
+    </div>
+
+
+
+    <!--Latest Activities Section-->
+    <div class="latest-activities">
+        <h2>Latest Activities</h2>
+
+        <!-- Latest Bookings -->
+        <h3>Latest Bookings</h3>
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Activity</th>
+                <th>Date</th>
+                <th>Time</th>
+            </tr>
+            {% for booking in latest_bookings %}
+            <tr>
+                <td>{{ booking.user.username }}</td>
+                <td>{{booking.activity}}</td>
+                <td>{{ booking.date }}</td>
+                <td>{{ booking.time }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No recent bookings</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Latest Payments -->
+        <h3>Recent Payments</h3>
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Activity</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+            {% for payment in recent_payments %}
+            <tr>
+                <td>{{ payment.booking.user.username }}</td>
+                <td>
+                    {% if payment.booking %} {{ payment.booking.activity.name }} {% else %} N/A {% endif %}
+                </td>
+                <td>£{{ payment.amount|floatformat:2 }}</td>
+                <td>{{ payment.date|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No recent payments</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Active Promotions -->
+        <h3>Active Promotions</h3>
+        <table>
+            <tr>
+                <th>Code</th>
+                <th>Discount</th>
+                <th>Expires</th>
+            </tr>
+            {% for promo in active_promo_list %}
+            <tr>
+                <td>{{ promo.code }}</td>
+                <td>{{ promo.discount_percentage }}%</td>
+                <td>{{ promo.end_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No active promotions</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!--Recent Activities Section-->
+    <div class="recent-activity">
+        <div class="activity-section">
+            <h3>New Users</h3>
+            <ul>
+                {% for user in recent_users %}
+                <li>
+                    {{ user.username }} - Joined on {{ user.date_joined|date:"M d, Y" }}
+                </li>
+                {% empty %}
+                <li>No recent users.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-section">
+            <h3>New Bookings</h3>
+            <ul>
+                {% for booking in recent_bookings %}
+                <li>
+                    {{ booking.user.username }} - {{ booking.date }} at {{booking.time}}
+                </li>
+                {% empty %}
+                <li>No new bookings.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-section">
+            <h3>New Payments</h3>
+            <ul>
+                {% for payment in recent_payments %}
+                <li>
+                    {{ payment.booking.user.username }} - £{{ payment.amount }} for {{ payment.booking.activity.name }} on {{ payment.date }}
+                </li>
+                {% empty %}
+                <li>No new payments.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!--Export Data Section-->
+    <h3>Export Data</h3>
+
+    <!-- Users -->
+    <a href="{% url 'export_users_csv' %}" class="export-btn">Export Users (CSV)</a
+    >
+    <a href="{% url 'export_users_excel' %}" class="export-btn"
+      >Export Users (Excel)</a
+    >
+
+    <!-- Bookings -->
+    <a href="{% url 'export_bookings_csv' %}" class="export-btn"
+      >Export Bookings (CSV)</a
+    >
+
+    <!-- Payments -->
+    <a href="{% url 'export_payments_csv' %}" class="export-btn"
+      >Export Payments (CSV)</a
+    ><br />
+
+    <a href="{% url 'logout' %}" class="logout-btn">Logout</a> {% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.3/main.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+<!--Booking Confirm Delete Page-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delete Booking</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+  </head>
+
+  <body class="container mt-5">
+    {% block content %}
+    <div
+      class="card shadow-lg p-4 mx-auto text-center"
+      style="max-width: 500px"
+    >
+      <h2 class="text-danger">Are you sure?</h2>
+      <p class="lead">
+        You are about to delete <strong>{{ booking.activity }}</strong> for
+        <strong>{{ booking.user.username }}</strong> on
+        <strong>{{ booking.date }}</strong> at
+        <strong>{{ booking.time }}</strong>.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'booking_list' %}" class="btn btn-secondary">Cancel</a>
+      </form>
+    </div>
+    {% endblock %}
+  </body>
+</html>

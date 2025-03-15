@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .home-container {
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 500px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a71d2a;
+        }
+        
+        .logout-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="home-container">
+        <h1>Welcome to Aston Sports Booking</h1>
+        <p>This is the homepage.</p>
+
+        {% if user.is_authenticated %}
+        <p>Hello, {{ user.username }}!</p>
+        {% if user.is_admin %}
+        <p><a href="{% url 'admin_dashboard' %}">Go to Admin Dashboard</a></p>
+        {% else %}
+        <p><a href="{% url 'user_booking_create' %}" class="btn btn-primary">Book Now</a></p>
+        <p><a href="{%url 'user_dashboard'%}" type="submit" class="btn btn-primary">Go to Dashboard</a></p>
+        <p><a href="{% url 'user_profile_edit' %}" class="btn btn-primary">Update Account Info</a></p>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a> {% endif %} {% else %}
+        <p>
+            <a href="{% url 'login' %}">Login</a> |
+            <a href="{% url 'register' %}">Register</a>
+        </p>
+        {% endif %}
+    </div>
+</body>
+
+</html>

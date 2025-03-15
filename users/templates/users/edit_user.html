@@ -1,0 +1,57 @@
+<!--Edit User Page-->
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit User</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+</head>
+
+<body>
+    {% block content %}
+    <div class="container mt-4">
+        <div class="card shadow-lg p-4 mx-auto" style="max-width: 600px">
+            <h2 class="text-center">Edit User: {{ user.username }}</h2>
+
+            <!--Messages for role change (Warnings)-->
+            {% if messages %} {% for message in messages %}
+            <div class="alert {% if message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %} {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">{{ form.as_p }}</div>
+
+                <!--Confirmation for role changes-->
+                <div id="roleConfirmation" class="alert alert-danger d-none">
+                    <strong>Warning!</strong> You are about to change this user's role. This action may affect their access.
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!--Javascript for role change confirmation-->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let roleSelect = document.querySelector("select[name='role']");
+            let warningDiv = document.getElementById("roleConfirmation");
+
+            roleSelect.addEventListener("change", function() {
+                warningDiv.classList.remove("d-none");
+            });
+        });
+    </script>
+    {% endblock %}
+</body>
+
+</html>
