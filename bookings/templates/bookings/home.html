@@ -2,109 +2,370 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Aston Sports Booking</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
+        .hero {
+            background: url('https://images.pexels.com/photos/399187/pexels-photo-399187.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;
+            height: 60vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 100vh;
-        }
-        
-        .home-container {
-            background-color: #fff;
-            padding: 20px 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            justify-content: center;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
             text-align: center;
-            width: 500px;
+            padding: 20px;
         }
         
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        p {
-            color: #555;
-            margin-bottom: 15px;
-        }
-        
-        a {
-            color: #007bff;
-            text-decoration: none;
+        .hero h1 {
+            font-size: 3rem;
             font-weight: bold;
         }
         
-        a:hover {
-            text-decoration: underline;
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
         }
         
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin-top: 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
+        .cta-buttons a {
+            margin: 5px;
         }
+        /* Chatbot Styles */
         
-        .btn-primary {
+        #chatbot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             background-color: #007bff;
             color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            font-size: 24px;
+            transition: background 0.3s ease;
         }
         
-        .btn-primary:hover {
+        #chatbot-button:hover {
             background-color: #0056b3;
         }
+        /* Chatbot Container */
         
-        .btn-danger {
-            background-color: #dc3545;
+        #chatbot-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 350px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        /* Chatbot Header */
+        
+        #chatbot-header {
+            background-color: #007bff;
             color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        /* Chatbot Messages */
+        
+        #chatbot-messages {
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            background: #f8f9fa;
         }
         
-        .btn-danger:hover {
-            background-color: #a71d2a;
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
         }
         
-        .logout-btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: red;
+        .bot-message {
+            background: #007bff;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
+            align-self: flex-start;
+        }
+        
+        .user-message {
+            background: #28a745;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+        }
+        /* Chatbot Suggestions */
+        
+        #chatbot-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px;
+            background: #ffffff;
+            border-top: 1px solid #ddd;
+        }
+        
+        .chatbot-suggestion {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        
+        .chatbot-suggestion:hover {
+            background-color: #ddd;
+        }
+        /* Chatbot Input */
+        
+        #chatbot-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+        
+        #user-input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        #send-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            margin-left: 10px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #send-button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 
 <body>
-    <div class="home-container">
-        <h1>Welcome to Aston Sports Booking</h1>
-        <p>This is the homepage.</p>
 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">Aston Sports Booking</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'activity_list_user' %}">Activities</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'membership_plans' %}">Memberships</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'promotions' %}">Promotions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %} {% if user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-secondary text-white px-3" href="{% url 'admin_dashboard' %}">Admin
+                            Dashboard</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'user_dashboard' %}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'user_profile_edit' %}">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-danger text-white px-3" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link btn btn-success text-white px-3" href="{% url 'register' %}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Book Your Favorite Sports Activity</h1>
+            <p>Join us to experience world-class sports facilities and activities.</p>
+            <div class="cta-buttons">
+                <a href="{% url 'activity_list_user' %}" class="btn btn-light btn-lg">View Activities</a>
+                <a href="{% url 'membership_plans' %}" class="btn btn-warning btn-lg">Become a Member</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="container my-5 text-center">
+        <h2>Welcome to Aston Sports Booking</h2>
+        <p>Find the best sports facilities and book your favorite activities with ease.</p>
         {% if user.is_authenticated %}
-        <p>Hello, {{ user.username }}!</p>
-        {% if user.is_admin %}
-        <p><a href="{% url 'admin_dashboard' %}">Go to Admin Dashboard</a></p>
-        {% else %}
-        <p><a href="{% url 'user_booking_create' %}" class="btn btn-primary">Book Now</a></p>
-        <p><a href="{%url 'user_dashboard'%}" type="submit" class="btn btn-primary">Go to Dashboard</a></p>
-        <p><a href="{% url 'user_profile_edit' %}" class="btn btn-primary">Update Account Info</a></p>
-        <a href="{% url 'logout' %}" class="logout-btn">Logout</a> {% endif %} {% else %}
-        <p>
-            <a href="{% url 'login' %}">Login</a> |
-            <a href="{% url 'register' %}">Register</a>
-        </p>
-        {% endif %}
+        <p>Hello, <strong>{{ user.username }}</strong>! Ready to make a booking?</p>
+        <a href="{% url 'user_booking_create' %}" class="btn btn-success">Book Now</a> {% endif %}
+    </section>
+
+    <section class="container my-5">
+        <h2 class="text-center mb-4">What Our Users Say</h2>
+        <div class="row"> {% for review in reviews %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3">
+                    <p>"{{ review.review_text }}"</p>
+                    <p class="text-muted">- {{ review.user.username }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center">No reviews yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="container my-5">
+        <h2 class="text-center mb-4">Leave a Review</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form method="post" class="card p-4 rounded-lg shadow-sm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.review_text.id_for_label }}" class="form-label">Your Review:</label>
+                        <textarea class="form-control" id="{{ form.review_text.id_for_label }}" name="{{ form.review_text.name }}" rows="4" placeholder="Write your review here..."></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 Aston Sports Booking. All rights reserved.</p>
+    </footer>
+
+    <!-- Chatbot Button -->
+    <button id="chatbot-button">💬</button>
+
+    <!-- Chatbot Container -->
+    <div id="chatbot-container">
+        <div id="chatbot-header">HelperBot</div>
+        <div id="chatbot-messages">
+            <div class="message bot-message">Hello, I'm HelperBot! How can I assist you?</div>
+        </div>
+        <div id="chatbot-suggestions">
+            <button class="chatbot-suggestion">Where are the activities?</button>
+            <button class="chatbot-suggestion">Where are the promotions?</button>
+            <button class="chatbot-suggestion">How to be a member?</button>
+            <button class="chatbot-suggestion">How to leave reviews?</button>
+            <button class="chatbot-suggestion">Other</button>
+        </div>
+        <div id="chatbot-input">
+            <input type="text" id="user-input" placeholder="Type your question...">
+            <button id="send-button">Send</button>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--Javascript for Chatbot-->
+    <script>
+        document.getElementById("chatbot-button").addEventListener("click", function() {
+            const chatbot = document.getElementById("chatbot-container");
+            chatbot.style.display = chatbot.style.display === "flex" ? "none" : "flex";
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const suggestionButtons = document.querySelectorAll('.chatbot-suggestion');
+            const messagesDiv = document.getElementById('chatbot-messages');
+            const userInputDiv = document.getElementById('chatbot-input');
+            const suggestionsDiv = document.getElementById('chatbot-suggestions');
+            const userInputField = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+
+            suggestionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const suggestion = this.textContent;
+                    messagesDiv.innerHTML += `<div class="message user-message">${suggestion}</div>`;
+
+                    let response = "";
+                    if (suggestion === "Where are the activities?") {
+                        response = "You can find the activities on the Activities page.";
+                    } else if (suggestion === "Where are the promotions?") {
+                        response = "You can find all of our promotions on the promotions page.";
+                    } else if (suggestion === "How to be a member?") {
+                        response = "You can become a member by going to the memberships page.";
+                    } else if (suggestion === "How to leave reviews?") {
+                        response = "You can leave a review at the bottom of the home page.";
+                    } else if (suggestion === "Other") {
+                        response = "Please type your question below.";
+                        suggestionsDiv.style.display = 'none';
+                        userInputDiv.style.display = 'flex';
+                    }
+
+                    messagesDiv.innerHTML += `<div class="message bot-message">${response}</div>`;
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                });
+            });
+
+            sendButton.addEventListener('click', function() {
+                const message = userInputField.value;
+                messagesDiv.innerHTML += `<div class="message user-message">${message}</div>`;
+
+                fetch('/users/save_chatbot_message/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken'), // Add this line
+                        },
+                        body: JSON.stringify({
+                            message: message
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            messagesDiv.innerHTML += `<div class="message bot-message">Submitted!</div>`;
+                            userInputField.value = ''; // Clear the input field
+                        } else {
+                            messagesDiv.innerHTML += `<div class="message bot-message">Error: ${data.message}</div>`;
+                        }
+                    });
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+
+            // Function to get CSRF token from cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+
 </body>
 
 </html>

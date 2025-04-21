@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
-from .forms import CustomUserCreationForm, CustomAuthenticationForm,UserEditForm, AddUserForm, MembershipForm, UserProfileEditForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm,UserEditForm, AddUserForm, MembershipForm, UserProfileEditForm, UserMembershipForm
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib import messages
 from django.db.models import Sum
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from users.models import CustomUser,Membership
+from users.models import CustomUser,Membership, Review
 from bookings.models import Booking, Activity
 from payments.models import Payment
 from promotions.models import Promotion
@@ -14,6 +15,11 @@ import xlwt
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from datetime import date, timedelta
+from .models import ChatbotMessage
+from django.http import JsonResponse
+import json
+
 
 
 
@@ -276,7 +282,7 @@ def delete_user(request, user_id):
                'last_name': user.last_name,
                'email': user.email,
                'username': user.username,
-               'membership_status': user.membership_status,
+               
                
                 }
     return render(request, 'users/delete_user.html', context)
@@ -299,7 +305,14 @@ class MembershipCreateView(CreateView):
     model = Membership
     form_class = MembershipForm
     template_name = "memberships/membership_form.html"
-    success_url = reverse_lazy("membership_list")  # Ensure this is correct
+    success_url = reverse_lazy("membership_list")
+
+    def form_valid(self, form):
+        membership = form.save(commit=False)
+        membership.save()  # Save the object first to set start_date
+        membership.expiration_date = membership.calculate_expiration_date()  # Calculate expiration_date after saving
+        membership.save()  # Save again to update expiration_date
+        return super().form_valid(form)
 
 
 # Edit a membership
@@ -352,3 +365,95 @@ def user_profile_edit(request):
     else:
         form = UserProfileEditForm(instance=user)  # Use the new form
     return render(request, "users/user_profile_edit.html", {"form": form})
+
+
+#For the users
+def membership_plans(request):
+    """View to display membership plans to users."""
+    membership_tiers = Membership.TIER_CHOICES
+    membership_details = {}
+
+    sample_user = CustomUser.objects.first()
+    
+    if not sample_user:
+        return render(request, "memberships/membership_plans.html", {
+            "membership_tiers": membership_tiers,
+            "membership_details": {},
+            "error_message": "No users found. Please create a user first.",
+        })
+
+    today = date.today()
+
+    for tier, _ in membership_tiers:
+        sample_membership = Membership(membership_type=tier, user=sample_user)
+        sample_membership.price = {
+            "Basic": 10.00,
+            "Premium": 25.00,
+            "Vip": 50.00
+        }.get(tier, 10.00)
+
+        sample_membership.start_date = today  # Set start_date to today
+
+        membership_details[tier] = {
+            'price': sample_membership.price,
+            'duration': sample_membership.calculate_expiration_date() - sample_membership.start_date
+        }
+
+    return render(request, "memberships/membership_plans.html", {
+        "membership_tiers": membership_tiers,
+        "membership_details": membership_details,
+        "today": today,
+    })
+
+@login_required
+def user_membership_signup(request, tier):
+    if request.method == 'POST':
+        form = UserMembershipForm(request.POST)
+        if form.is_valid():
+            membership = form.save(commit=False)
+            membership.user = request.user
+            membership.save()  # Save the object first to set start_date
+            membership.expiration_date = membership.calculate_expiration_date()  # Calculate expiration date after saving
+            membership.save()  # Save again to update expiration_date
+            return redirect('user_dashboard')
+    else:
+        form = UserMembershipForm(initial={'membership_type': tier})
+    return render(request, 'users/user_membership_signup.html', {'form': form, 'tier': tier})
+
+def promotions(request):
+    today = timezone.now().date()
+    active_promotions = Promotion.objects.filter(is_active=True, end_date__gte=today)
+    return render(request, 'users/promotions.html', {
+        'active_promotions': active_promotions,
+    })
+
+def admin_required(user):
+    return user.is_authenticated and user.is_admin
+
+@login_required
+@user_passes_test(admin_required)
+def admin_reviews(request):
+    reviews = Review.objects.all().order_by('-created_at')
+    return render(request, 'users/admin_reviews.html', {'reviews': reviews})
+
+
+@csrf_exempt
+@login_required
+def save_chatbot_message(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        message = data.get("message")
+        if message:
+            ChatbotMessage.objects.create(user=request.user, message=message)
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": "Message is required"})
+    else:
+        return JsonResponse({"status": "error", "message": "Invalid request method"})
+    
+
+@login_required
+@user_passes_test(admin_required) 
+def chatbot_messages(request):
+    messages = ChatbotMessage.objects.all().order_by('-timestamp')
+    return render(request, 'bookings/chatbot_messages.html', {'messages': messages})

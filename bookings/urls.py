@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import BookingListView, BookingCreateView, BookingUpdateView, BookingDeleteView, activity_list, add_activity,edit_activity, delete_activity, booking_events, calendar_view, user_booking_create, check_availability, user_dashboard, payment_review, process_payment #added process_payment
+from .views import BookingListView, BookingCreateView, BookingUpdateView, BookingDeleteView, activity_list, add_activity,edit_activity, delete_activity, booking_events, calendar_view, user_booking_create, check_availability, user_dashboard, payment_review, process_payment, about, activity_list_user
 
 urlpatterns = [
     path('', BookingListView.as_view(), name='booking_list'),
@@ -15,5 +15,9 @@ urlpatterns = [
     path('activities/<int:activity_id>/edit/', edit_activity, name='edit_activity'),
     path('activities/<int:activity_id>/delete/', delete_activity, name='delete_activity'),
     path('payment_review/<int:booking_id>/', payment_review, name='payment_review'),
-    path('process_payment/<int:booking_id>/', process_payment, name='process_payment'), #added this line
+    path('process_payment/<int:booking_id>/', process_payment, name='process_payment'),
+    path('about/', about, name='about'),
+    path('user-activities/', activity_list_user, name='activity_list_user'),
+    
 ]
+

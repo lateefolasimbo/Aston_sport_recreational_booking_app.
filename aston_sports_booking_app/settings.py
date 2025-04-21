@@ -97,6 +97,10 @@ DATABASES = {
 }
 
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -144,3 +148,10 @@ AUTH_USER_MODEL = 'users.CustomUser'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Gmail SMTP server
+EMAIL_PORT = 587  # Port for TLS
+EMAIL_HOST_USER = 'astonsportsbook@gmail.com'  # Gmail address
+EMAIL_HOST_PASSWORD = 'password'  #  Gmail App Password
+EMAIL_USE_TLS = True  # Use TLS

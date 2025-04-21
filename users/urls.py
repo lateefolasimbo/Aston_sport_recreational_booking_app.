@@ -1,7 +1,9 @@
 from django.urls import path
 from . import views
 from bookings.views import home, calendar_view
-from .views import register, user_login, user_logout, admin_dashboard, export_users_csv, export_bookings_csv, export_payments_csv, export_users_excel, user_list, edit_user, add_user, view_user, delete_user, MembershipListView, MembershipUpdateView, MembershipCreateView, MembershipDeleteView, user_profile_edit
+from .views import register, user_login, user_logout, admin_dashboard, export_users_csv, export_bookings_csv, export_payments_csv, export_users_excel, user_list, edit_user, add_user, view_user, delete_user, MembershipListView, MembershipUpdateView, MembershipCreateView, MembershipDeleteView, user_profile_edit, membership_plans, admin_reviews, chatbot_messages, save_chatbot_message
+
+
 
 urlpatterns = [
     path('', home, name='home'),  
@@ -23,7 +25,13 @@ urlpatterns = [
     path('export/bookings/csv/', views.export_bookings_csv, name='export_bookings_csv'),
     path('export/payments/csv/', views.export_payments_csv, name='export_payments_csv'),
     path('export/users/excel/',views.export_users_excel, name='export_users_excel'),
-     path('profile/edit/', views.user_profile_edit, name='user_profile_edit'),
+    path('profile/edit/', views.user_profile_edit, name='user_profile_edit'),
+    path("membership-plans/", views.membership_plans, name="membership_plans"),
+    path('membership/signup/<str:tier>/', views.user_membership_signup, name='user_membership_signup'),
+    path('promotions/', views.promotions, name='promotions'),
+    path('admin/reviews/', views.admin_reviews, name='admin_reviews'),
+      path('save_chatbot_message/', views.save_chatbot_message, name='save_chatbot_message'),
+    path('chatbot_messages/', views.chatbot_messages, name='chatbot_messages'),
     
     
 ]

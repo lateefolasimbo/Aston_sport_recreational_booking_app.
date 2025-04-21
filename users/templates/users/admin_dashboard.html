@@ -296,18 +296,18 @@
 
 
         <!-- Button to Manage Users -->
-        <a href="{% url 'user_list' %}" class="action-button">Manage Users</a>
+        <a href="{% url 'user_list' %}" class="action-button">Users</a>
 
         <!-- Button to Manage Bookings -->
-        <a href="{% url 'booking_list' %}" class="action-button">Manage Bookings</a
+        <a href="{% url 'booking_list' %}" class="action-button">Bookings</a
       >
 
       <!-- Button to Manage Promotions -->
-        <a href="{% url 'promotion_list' %}" class="action-button">Manage Promotions</a>
+        <a href="{% url 'promotion_list' %}" class="action-button">Promotions</a>
 
         <!--Button to Manage Activities-->
 
-        <a href="{% url 'activity_list' %}" class="action-button">Manage Activities</a>
+        <a href="{% url 'activity_list' %}" class="action-button">Activities</a>
 
         <!--Button for the calendar-->
 
@@ -316,6 +316,15 @@
         <!--Button to manage members-->
 
         <a href="{% url 'membership_list' %}" class="action-button">Members</a>
+
+        <!--Button to view Site -->
+        <a href="{% url 'home' %}" class="action-button">View Site</a>
+
+        <!--Button to see user reviews -->
+        <a href="{% url 'admin_reviews' %}" class="action-button">Reviews</a>
+
+        <!--Button to see specific chatbot messages -->
+        <a href="{% url 'chatbot_messages' %}" class="action-button">Chatbot Messages</a>
     </div>
 
 

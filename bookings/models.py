@@ -6,6 +6,7 @@ from  decimal import Decimal
 class Activity(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to='activity_images/', null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00) 
     availability_status = models.BooleanField(default=True, help_text="Check if the activity is available")
 
@@ -38,6 +39,7 @@ class Booking(models.Model):
 
     def get_total_price(self):
         activity_price = self.activity.price
-        duration_hours = self.duration / 60  # Convert minutes to hours
-        total_price = activity_price * Decimal(str(duration_hours)) #Convert duration to Decimal
+        duration_hours = self.duration / 60
+        total_price = activity_price * Decimal(str(duration_hours))  # Convert duration_hours to Decimal
         return total_price
+    

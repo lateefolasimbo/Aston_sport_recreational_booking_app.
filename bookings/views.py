@@ -12,10 +12,25 @@ from django.utils.dateparse import parse_datetime
 from datetime import time
 from payments.models import Payment
 from promotions.models import Promotion
+from users.models import Membership, Review
+from users.forms import ReviewForm
+from django.core.mail import send_mail
 
 #Homepage
 def home(request):
-  return render(request, 'bookings/home.html')
+    reviews = Review.objects.all()  # Retrieve all reviews from the database
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.save()
+            return redirect('home')  # Redirect to the same page to clear the form
+    else:
+        form = ReviewForm()
+
+    return render(request, 'bookings/home.html', {'form': form, 'reviews': reviews})
 
 #Booking List View
 class BookingListView(ListView):
@@ -27,22 +42,14 @@ class BookingListView(ListView):
         context = super().get_context_data(**kwargs)
         discounted_prices = {}
         for booking in context['bookings']:
-            discounted_price = booking.get_total_price()
             try:
                 payment = booking.payments.first()
-                print(f"Payment: {payment}")
                 if payment:
-                    print(f"Payment promotion ID: {payment.promotion_id}")
-                if payment and payment.promotion_id:
-                    promotion = Promotion.objects.get(id=payment.promotion_id)
-                    discount = promotion.discount_percentage / 100
-                    discounted_price = discounted_price * (1 - discount)
+                    discounted_prices[booking.id] = payment.amount
                 else:
-                    print("No payment or promotion ID")
-            except (Promotion.DoesNotExist, AttributeError):
-                print("Promotion does not exist or attribute error")
-                pass
-            discounted_prices[booking.id] = discounted_price
+                    discounted_prices[booking.id] = booking.get_total_price()  # Original price if no payment
+            except AttributeError:
+                discounted_prices[booking.id] = booking.get_total_price()  # Original price if no payments attribute
         print("Discounted Prices:", discounted_prices)
         context['discounted_prices'] = discounted_prices
         return context
@@ -57,15 +64,26 @@ class BookingCreateView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         from payments.models import Payment
-        Payment.objects.create(booking=self.object)
+        amount = self.object.activity.price
+        Payment.objects.create(booking=self.object, amount=amount)
+
+        # Send email
+        subject = 'Booking Confirmation'
+        message = f'Hello {self.object.user.first_name}, your booking for {self.object.activity.name} has been confirmed for {self.object.date} at {self.object.time}. Looking forward to seeing you soon.'
+        from_email = 'astonsportsbook@gmail.com'
+        recipient_list = [self.object.user.email]
+        send_mail(subject, message, from_email, recipient_list)
+
         return response
 
-#Booking Create View (Update/Edit)
+#Booking (Update/Edit)  View 
 class BookingUpdateView(UpdateView):
     model = Booking
     form_class = BookingForm
     template_name = 'bookings/booking_form.html'
     success_url = reverse_lazy('booking_list')
+
+    
 
 #Booking Confirm Delete View
 class BookingDeleteView(DeleteView):
@@ -157,7 +175,7 @@ def calendar_view(request):
             "color": "#28a745" if booking.status == "confirmed" else "#ff0000" if booking.status == "cancelled" else "#ffc107",  # Customize color based on status
         })
 
-    print("Events JSON:", json.dumps(events))  # Debugging output
+   
 
     return render(request, "users/calendar.html", {"events": json.dumps(events)})
 
@@ -170,16 +188,23 @@ def user_booking_create(request):
             booking = form.save(commit=False)
             booking.user = request.user
             booking.status = 'pending'
-            promotion_code = form.cleaned_data.get('promotion_code')  # Get promotion code
+            promotion_code = form.cleaned_data.get('promotion_code')
 
             try:
                 if promotion_code:
                     promotion = Promotion.objects.get(code=promotion_code, is_active=True)
-                    request.session['promotion_id'] = promotion.id  # Store promotion in session
+                    request.session['promotion_id'] = promotion.id
                 else:
-                    request.session.pop('promotion_id', None)  # Remove promotion from session if no code
+                    request.session.pop('promotion_id', None)
                 booking.save()
-                print(f"Booking saved: {booking}")
+
+                # Send email
+                subject = 'Booking Confirmation'
+                message = f'Hello {booking.user.first_name}, your booking for {booking.activity.name} has been confirmed for {booking.date} at {booking.time}. Looking forward to seeing you soon.'
+                from_email = 'astonsportsbook@gmail.com'
+                recipient_list = [booking.user.email]
+                send_mail(subject, message, from_email, recipient_list)
+
                 return redirect('payment_review', booking_id=booking.id)
 
             except Promotion.DoesNotExist:
@@ -218,9 +243,11 @@ def check_availability(request):
 @login_required
 def user_dashboard(request):
     user_bookings = Booking.objects.filter(user=request.user).order_by('-date', '-time')
-    print("User Bookings:", user_bookings)  # Debugging line
+    user_membership = Membership.objects.filter(user=request.user).first()  # Fetch user's membership
+    print("User Bookings:", user_bookings)
     context = {
         'user_bookings': user_bookings,
+        'user_membership': user_membership,  # Add membership to context
     }
     return render(request, 'users/user_dashboard.html', context)
 
@@ -251,12 +278,15 @@ def process_payment(request, booking_id):
 
     promotion_id = request.session.get('promotion_id')  # Get promotion from session
     promotion = None  # Initialize promotion to None
+
+    print(f"Total price before discount: {total_price}")  # Add this line
+
     if promotion_id:
         promotion = get_object_or_404(Promotion, id=promotion_id)
         discount = promotion.discount_percentage / 100
         total_price = total_price * (1 - discount)  # Apply discount
 
-    print(f"Total price: {total_price}")  # Debugging line
+    print(f"Total price after discount: {total_price}")  # Add this line
 
     if request.method == "POST":
         messages.success(request, "Payment successful!")
@@ -277,3 +307,12 @@ def process_payment(request, booking_id):
     else:
         messages.error(request, "Invalid request.")
         return redirect('payment_review', booking_id=booking.id)
+    
+
+
+def about(request):
+    return render(request, "bookings/about.html")
+
+def activity_list_user(request):
+    activities = Activity.objects.all()
+    return render(request, 'bookings/activities.html', {'activities': activities})

@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
-from .models import CustomUser, Membership
+from .models import CustomUser, Membership, Review
 from django.contrib.auth import get_user_model
+
 
 # User Creation Form
 class CustomUserCreationForm(UserCreationForm):
@@ -113,3 +114,28 @@ class UserProfileEditForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+    
+# For Users
+class UserMembershipForm(forms.ModelForm):
+    class Meta:
+        model = Membership
+        fields = ["membership_type", "auto_renew"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['membership_type'].widget = forms.Select(choices=Membership.TIER_CHOICES)
+        self.fields['auto_renew'].widget = forms.CheckboxInput()
+
+    def clean_membership_type(self):
+        membership_type = self.cleaned_data.get('membership_type')
+        if membership_type not in dict(Membership.TIER_CHOICES):
+            raise forms.ValidationError("Invalid membership type selected.")
+        return membership_type
+    
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['review_text']
+        widgets = {
+            'review_text': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Your review...'}),
+        }
