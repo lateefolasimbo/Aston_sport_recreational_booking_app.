@@ -27,7 +27,7 @@ class Booking(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name="bookings")
     date = models.DateField()
     time = models.TimeField()
-    duration = models.IntegerField(choices=DURATION_CHOICES, default=60, help_text="Duration in minutes") #changed to choices
+    duration = models.IntegerField(choices=DURATION_CHOICES, default=60, help_text="Duration in minutes") #changed to choice
     status = models.CharField(
         max_length=20,
         choices=[("pending", "Pending"), ("confirmed", "Confirmed"), ("cancelled", "Cancelled")],
@@ -40,6 +40,6 @@ class Booking(models.Model):
     def get_total_price(self):
         activity_price = self.activity.price
         duration_hours = self.duration / 60
-        total_price = activity_price * Decimal(str(duration_hours))  # Convert duration_hours to Decimal
+        total_price = activity_price * Decimal(str(duration_hours))  # Convert duration_hours to Decimal type
         return total_price
     
