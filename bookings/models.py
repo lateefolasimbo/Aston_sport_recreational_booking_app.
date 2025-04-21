@@ -40,6 +40,6 @@ class Booking(models.Model):
     def get_total_price(self):
         activity_price = self.activity.price
         duration_hours = self.duration / 60
-        total_price = activity_price * Decimal(str(duration_hours))  # Convert duration_hours to Decimal type
+        total_price = activity_price * Decimal(str(duration_hours))  # Convert duration_hours to Decimal 
         return total_price
     

@@ -29,18 +29,13 @@ def register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_admin = form.cleaned_data['is_admin'] #setting is_admin from forms.py
-            user.save()
+            user = form.save() # Now we just save the user directly
             login(request, user)
-            messages.success(request, "Registration Successful!")  
+            messages.success(request, "Registration Successful!")
 
-            if user.is_admin:
-                return redirect('admin_dashboard') # Redirect to the admin dashboard
-            else:
-                return redirect('home')  # Redirect to the home page for regular customers
+            return redirect('home')  # Redirect regular users to the home page
         else:
-            # If the form is invalid error messages are displayed 
+            # If the form is invalid error messages are displayed
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"Error in {field}: {error}")

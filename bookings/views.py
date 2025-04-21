@@ -14,7 +14,8 @@ from payments.models import Payment
 from promotions.models import Promotion
 from users.models import Membership, Review
 from users.forms import ReviewForm
-from django.core.mail import send_mail
+from django.utils import timezone
+
 
 #Homepage
 def home(request):
@@ -32,7 +33,6 @@ def home(request):
 
     return render(request, 'bookings/home.html', {'form': form, 'reviews': reviews})
 
-#Booking List View
 class BookingListView(ListView):
     model = Booking
     template_name = 'bookings/booking_list.html'
@@ -40,8 +40,18 @@ class BookingListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        now = timezone.now().date()
+        upcoming_bookings = Booking.objects.filter(date__gte=now).order_by('date', 'time')
+        previous_bookings = Booking.objects.filter(date__lt=now).order_by('-date', '-time')
+
+        context['upcoming_bookings'] = upcoming_bookings
+        context['previous_bookings'] = previous_bookings
+        context['discounted_prices'] = self.get_discounted_prices(upcoming_bookings) | self.get_discounted_prices(previous_bookings)
+        return context
+
+    def get_discounted_prices(self, bookings):
         discounted_prices = {}
-        for booking in context['bookings']:
+        for booking in bookings:
             try:
                 payment = booking.payments.first()
                 if payment:
@@ -50,30 +60,19 @@ class BookingListView(ListView):
                     discounted_prices[booking.id] = booking.get_total_price()  # Original price if no payment
             except AttributeError:
                 discounted_prices[booking.id] = booking.get_total_price()  # Original price if no payments attribute
-        print("Discounted Prices:", discounted_prices)
-        context['discounted_prices'] = discounted_prices
-        return context
+        return discounted_prices
 
 #Booking Create View (Admin)
 class BookingCreateView(CreateView):
     model = Booking
     form_class = BookingForm
     template_name = 'bookings/booking_form.html'
-    success_url = reverse_lazy('booking_list')
+    success_url = reverse_lazy('booking_list')  
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        from payments.models import Payment
         amount = self.object.activity.price
         Payment.objects.create(booking=self.object, amount=amount)
-
-        # Send email
-        subject = 'Booking Confirmation'
-        message = f'Hello {self.object.user.first_name}, your booking for {self.object.activity.name} has been confirmed for {self.object.date} at {self.object.time}. Looking forward to seeing you soon.'
-        from_email = 'astonsportsbook@gmail.com'
-        recipient_list = [self.object.user.email]
-        send_mail(subject, message, from_email, recipient_list)
-
         return response
 
 #Booking (Update/Edit)  View 
@@ -198,12 +197,7 @@ def user_booking_create(request):
                     request.session.pop('promotion_id', None)
                 booking.save()
 
-                # Send email
-                subject = 'Booking Confirmation'
-                message = f'Hello {booking.user.first_name}, your booking for {booking.activity.name} has been confirmed for {booking.date} at {booking.time}. Looking forward to seeing you soon.'
-                from_email = 'astonsportsbook@gmail.com'
-                recipient_list = [booking.user.email]
-                send_mail(subject, message, from_email, recipient_list)
+                # Email sending code removed
 
                 return redirect('payment_review', booking_id=booking.id)
 
@@ -242,15 +236,17 @@ def check_availability(request):
 
 @login_required
 def user_dashboard(request):
-    user_bookings = Booking.objects.filter(user=request.user).order_by('-date', '-time')
-    user_membership = Membership.objects.filter(user=request.user).first()  # Fetch user's membership
-    print("User Bookings:", user_bookings)
+    now = timezone.now().date()
+    upcoming_bookings = Booking.objects.filter(user=request.user, date__gte=now).order_by('date', 'time')
+    previous_bookings = Booking.objects.filter(user=request.user, date__lt=now).order_by('-date', '-time')
+    user_membership = Membership.objects.filter(user=request.user).first()
+
     context = {
-        'user_bookings': user_bookings,
-        'user_membership': user_membership,  # Add membership to context
+        'upcoming_bookings': upcoming_bookings,
+        'previous_bookings': previous_bookings,
+        'user_membership': user_membership,
     }
     return render(request, 'users/user_dashboard.html', context)
-
 @login_required
 def payment_review(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
