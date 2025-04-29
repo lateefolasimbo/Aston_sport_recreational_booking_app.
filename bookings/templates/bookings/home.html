@@ -339,7 +339,7 @@
                     .then(data => {
                         if (data.status === 'success') {
                             messagesDiv.innerHTML += `<div class="message bot-message">Submitted!</div>`;
-                            userInputField.value = ''; // Clear the input field
+                            userInputField.value = ''; // Clear the input fields
                         } else {
                             messagesDiv.innerHTML += `<div class="message bot-message">Error: ${data.message}</div>`;
                         }
